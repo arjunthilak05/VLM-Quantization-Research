@@ -1,0 +1,103 @@
+# VLM Quantization Research Configuration
+
+# Models to evaluate (in priority order)
+models:
+  - name: "qwen2_vl_7b"
+    hf_path: "Qwen/Qwen2-VL-7B-Instruct"
+    type: "vlm"
+    priority: 1
+
+  - name: "llava_v15_7b"
+    hf_path: "liuhaotian/llava-v1.5-7b"
+    type: "vlm"
+    priority: 2
+
+  - name: "minicpm_v_26"
+    hf_path: "openbmb/MiniCPM-V-2_6"
+    type: "vlm"
+    priority: 3
+
+# Quantization configurations
+quantization:
+  ptq_methods:
+    gptq:
+      enabled: true
+      bits: [4, 8]
+      group_size: 128
+      desc_act: false
+      sym: true
+
+    awq:
+      enabled: true
+      bits: [4]
+      group_size: 128
+      zero_point: true
+      version: "GEMM"
+
+    bnb:
+      enabled: true
+      bits: [4, 8]
+      quant_type: "nf4"
+      compute_dtype: "bfloat16"
+      double_quant: true
+
+  qat:
+    enabled: true
+    bits: 4
+    group_size: 32
+    activation_bits: 8
+    training_epochs: 3
+    learning_rate: 2.0e-5
+    batch_size: 4
+    max_steps: 5000
+
+# Evaluation benchmarks
+benchmarks:
+  - name: "MMBench_DEV_EN"
+    enabled: true
+
+  - name: "TextVQA_VAL"
+    enabled: true
+
+  - name: "ScienceQA_VAL"
+    enabled: true
+
+  - name: "GQA_VAL"
+    enabled: true
+
+  - name: "MMMU_DEV_VAL"
+    enabled: true
+
+# Calibration dataset settings
+calibration:
+  dataset: "LLaVA-Instruct-150K"
+  num_samples: 512
+  max_length: 2048
+  seed: 42
+
+# Training dataset for QAT
+training:
+  dataset: "LLaVA-Instruct-150K"
+  num_samples: 10000
+  validation_split: 0.1
+  seed: 42
+
+# Hardware settings
+hardware:
+  device: "cuda"
+  precision: "bfloat16"
+  max_memory: "80GB"  # H200 GPU
+  use_flash_attention: true
+
+# Logging and output
+logging:
+  use_wandb: true
+  project_name: "vlm-quantization-research"
+  log_interval: 10
+  save_checkpoints: true
+
+output:
+  results_dir: "results"
+  models_dir: "models"
+  plots_dir: "results/plots"
+  tables_dir: "results/tables"
